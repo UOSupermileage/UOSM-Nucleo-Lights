@@ -6,6 +6,7 @@
 #define UOSM_LIGHTS_LIGHTSDRIVER_H
 
 #include "ApplicationTypes.h"
+#include "stm32l4xx_hal.h"
 #define BLINK_DELAY 600 //Will blink a bit less than once every half second.
 
 // TODO: Create getters and setters to access data

@@ -5,26 +5,28 @@
 //
 
 #include "TaskManager.h"
+#include "MCP251XFD.h"
+#include "network.h"
 #include "UOSMCoreConfig.h"
 #include "InternalCommsModule.h"
 #include "LightsDriver.h"
 #include "pins.h"
 
 _Noreturn void RunTaskManager(void) {
-    //Initialize MCP
+    // Initialize CAN
+    CAN_Init();
+
+    // Initialize MCP
     MCP2515_CS_HIGH();
 
-    // Initialize CAN
-    IComms_Init();
-
     flag_status_t blink;
-    uint32_t blink_delay = BLINK_DELAY; //Blink interval in milliseconds
+    uint32_t blink_delay = BLINK_DELAY; // Blink interval in milliseconds
 
     uint32_t current_time = HAL_GetTick();
     uint32_t previous_time = 0;
     while (1) {
         // Check for CAN messages
-        IComms_PeriodicReceive();
+        CAN_Receive();
 
         // TODO: Actuate Lights based off of state in LightsDriver
         current_time = HAL_GetTick();
@@ -41,7 +43,7 @@ _Noreturn void RunTaskManager(void) {
         setLowBeams(getLowBeamsStatus() == Set);
 
         setRunningLights();
-        setBrakeLights();
+        // setBrakeLights(); // N/A
 
         //Update blink flag
         if (current_time - previous_time >= blink_delay) {

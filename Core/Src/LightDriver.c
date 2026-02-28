@@ -5,6 +5,7 @@
 
 #include "LightsDriver.h"
 #include "pins.h"
+
 static volatile brightness_t running_lights_red;
 static volatile brightness_t running_lights_green;
 static volatile brightness_t running_lights_blue;

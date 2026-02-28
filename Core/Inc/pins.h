@@ -23,7 +23,7 @@
 #define RunningLightsG_port GPIOA
 #define RunningLightsG_pin GPIO_PIN_10
 
-#define RunningLightsB_port GPIOB
+#define RunningLightsB_port GPIOA
 #define RunningLightsB_pin GPIO_PIN_11
 
 // Headlights
@@ -34,10 +34,10 @@
 #define HeadlightsHigh_pin GPIO_PIN_0
 
 // Turn Signals
-#define LeftTurn_port GPIOA
+#define LeftTurn_port GPIOB
 #define LeftTurn_pin GPIO_PIN_5
 
-#define RightTurn_port GPIOA
+#define RightTurn_port GPIOB
 #define RightTurn_pin GPIO_PIN_4
 
 #endif

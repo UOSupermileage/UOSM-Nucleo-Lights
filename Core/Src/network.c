@@ -79,8 +79,8 @@ void CAN_Receive() {
                 if (ErrorExt1 == ERR_OK) {
                     //***** Do what you want with the message *****
                     printf("Message received!");
-                    printf("Message ID: %d\n", ReceivedMessage.MessageID);
-                    printf("Message Timestamp: %d\n", MessageTimeStamp);
+                    printf("Message ID: %lu\n", ReceivedMessage.MessageID);
+                    printf("Message Timestamp: %lu\n", MessageTimeStamp);
                     printf("Message DLC: %d\n", ReceivedMessage.DLC);
 
 //                    MsgInterpreter_ProcessMessage(ReceivedMessage.MessageID,ReceivedMessage.PayloadData);

@@ -62,7 +62,7 @@ MCP251XFD MCP251XFD_Ext1 = {
     .GPIOsOutLevel = MCP251XFD_GPIO0_LOW | MCP251XFD_GPIO1_HIGH,
     //--- Interface driver call functions ---
     .SPI_ChipSelect = 17, // Here the chip select of the EXT1 interface is 1 //Currently unused in UOSM
-    .InterfaceDevice = &hspi1, // Here this point to the address memory of the peripheral SPI1 //TODO: Check that this is the right pointer.
+    .InterfaceDevice = (void*)0x40013000, // Here this point to the address memory of the peripheral SPI1 //TODO: Check that this is the right pointer.
     .fnSPI_Init = &SPI_Init,
     .fnSPI_Transfer = &SPI_Transfer,
     //--- Time call function ---

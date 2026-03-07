@@ -14,12 +14,18 @@
 #include "ApplicationTypes.h"
 #include "SerialDebugDriver.h"
 
+extern SPI_HandleTypeDef hspi1;
+
 _Noreturn void RunTaskManager(void) {
     // Initialize CAN
     CAN_Init();
 
+    DebugPrint("%d", hspi1.Instance);
+
     // Initialize MCP
     // MCP2515_CS_HIGH();
+
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
 
     flag_status_t blink;
     uint32_t blink_delay = BLINK_DELAY; // Blink interval in milliseconds
@@ -29,7 +35,7 @@ _Noreturn void RunTaskManager(void) {
     while (1) {
         // Check for CAN messages
         CAN_Receive();
-
+        // CAN_Send();
         // SerialPrintln("pomme");
 
         // // TODO: Actuate Lights based off of state in LightsDriver

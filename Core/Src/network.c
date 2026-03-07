@@ -40,8 +40,8 @@ bool CAN_Init() {
     if (ErrorExt1 != ERR_OK)
         return false;
 
-    ErrorExt1 = MCP251XFD_StartCAN20(CANEXT1);
-    //ErrorExt1 = MCP251XFD_StartCANListenOnly(CANEXT1);
+    // ErrorExt1 = MCP251XFD_StartCAN20(CANEXT1);
+    ErrorExt1 = MCP251XFD_StartCANListenOnly(CANEXT1);
     if (ErrorExt1 != ERR_OK)
         return false;
 
@@ -52,22 +52,25 @@ void CAN_Receive() {
     eERRORRESULT ErrorExt1 = ERR_OK;
     eMCP251XFD_FIFOstatus FIFOstatus = 0;
     setMCP251XFD_InterruptOnFIFO InterruptOnFIFO = 0;
-   // printf("in here");
+   // DebugPrint("1");
 
     ErrorExt1 = MCP251XFD_GetReceivePendingInterruptStatusOfAllFIFO(CANEXT1, &InterruptOnFIFO); // Get all FIFO status
-    if (ErrorExt1 != ERR_OK){
-       // printf("in here2");
-        return;}
+    if (ErrorExt1 == ERR_NONE){
+        DebugPrint("2 err: %d", ErrorExt1);
+        return;
+    }
+    DebugPrint("3");
 
     for (eMCP251XFD_FIFO zFIFO = 1; zFIFO < MCP251XFD_FIFO_MAX; zFIFO++) { // For each receive FIFO but not TEF, TXQ
         if ((InterruptOnFIFO & (1 << zFIFO)) > 0) { // If an Interrupt is flagged
             ErrorExt1 = MCP251XFD_GetFIFOStatus(CANEXT1, zFIFO, &FIFOstatus); // Get the status of the flagged FIFO
-            if (ErrorExt1 != ERR_OK){
-              //  printf("in here3");
+            if (ErrorExt1 == ERR_NONE){
+                DebugPrint("4");
             return;}
 
             if ((FIFOstatus & MCP251XFD_RX_FIFO_NOT_EMPTY) > 0) { // Check FIFO not empty
                // printf("in if statement");
+                DebugPrint("5");
                 uint32_t MessageTimeStamp = 0;
                 uint8_t RxPayloadData[8]; // In this example, all the FIFO have 8 bytes of payload
                 MCP251XFD_CANMessage ReceivedMessage;
@@ -97,8 +100,10 @@ void CAN_Send() {
     eERRORRESULT ErrorExt1 = ERR_OK;
     eMCP251XFD_FIFOstatus FIFOstatus = 0;
     ErrorExt1 = MCP251XFD_GetFIFOStatus(CANEXT1, MCP251XFD_TXQ, &FIFOstatus); // First get FIFO2 status
-    if (ErrorExt1 != ERR_OK)
+    if (ErrorExt1 != ERR_OK) {
+        DebugPrint("Error Sending Error: %d\n", ErrorExt1);
         return;
+    }
     //
     // int32_t velocity = 123;
     // uint8_t data[8];
@@ -140,19 +145,19 @@ void CAN_Send() {
 
         if (ErrorExt1 != ERR_OK)
         {
-            printf("Transmission failed: %d\n", ErrorExt1);
+            DebugPrint("Transmission failed: %d\n", ErrorExt1);
         }
     } else {
-        printf("FIFO full. Cannot send CAN message\n");
+        DebugPrint("FIFO full. Cannot send CAN message\n");
     }
 }
 void Flush(){
     eERRORRESULT ErrorExt1 = ERR_OK;
     ErrorExt1 = MCP251XFD_FlushFIFO(CANEXT1, MCP251XFD_TXQ);
     if (ErrorExt1 != ERR_OK)
-        printf("Flush failed: %d\n", ErrorExt1);
+        DebugPrint("Flush failed: %d\n", ErrorExt1);
     else{
-        printf("Flush successful\n");
+        DebugPrint("Flush successful\n");
     }
 }
 

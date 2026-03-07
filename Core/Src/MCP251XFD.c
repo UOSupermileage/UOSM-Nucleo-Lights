@@ -74,15 +74,15 @@ eERRORRESULT Init_MCP251XFD(MCP251XFD *pComp, const MCP251XFD_Config *pConf)
 
   //--- Reset -----------------------------------------------
   Error = MCP251XFD_ResetDevice(pComp);                                                                  // Reset the device
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_ResetDevice() then return the error
+  //if (Error != ERR_NONE) return Error;                                                                 // If there is an error while calling MCP251XFD_ResetDevice() then return the error. TODO: Reactivate this IF statement when the errors cease to be broken.
   pComp->InternalConfig = MCP251XFD_DEV_PS_SET(MCP251XFD_DEVICE_SLEEP_NOT_CONFIGURED);                   // Device is in normal power state, sleep is not yet configured
 
   //--- Test SPI connection ---------------------------------
   Error = MCP251XFD_WriteRAM32(pComp, (MCP251XFD_RAM_ADDR + MCP251XFD_RAM_SIZE - 4), 0xAA55AA55);        // Write 0xAA55AA55 at address
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while writing the RAM address then return the error
+  //if (Error != ERR_NONE) return Error;                                                                   // If there is an error while writing the RAM address then return the error
   Error = MCP251XFD_ReadRAM32(pComp, (MCP251XFD_RAM_ADDR + MCP251XFD_RAM_SIZE - 4), &Result);            // Read again the data
   if ((Error == ERR__CRC_ERROR) || (Result != 0xAA55AA55)) return ERR__NO_DEVICE_DETECTED;               // If CRC mismatch or data read is not 0xAA55AA55 then no device is detected
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while reading the RAM address then return the error
+  //if (Error != ERR_NONE) return Error;                                                                   // If there is an error while reading the RAM address then return the error
 
   //--- Configure component clock ---------------------------
   uint8_t Config = MCP251XFD_SFR_OSC_WAKEUP | MCP251XFD_SFR_OSC8_SCLKDIV_SET(MCP251XFD_SCLK_DivBy1) | MCP251XFD_SFR_OSC8_PLLDIS;
@@ -96,7 +96,7 @@ eERRORRESULT Init_MCP251XFD(MCP251XFD *pComp, const MCP251XFD_Config *pConf)
   if (pConf->ClkoPinConfig != MCP251XFD_CLKO_SOF) Config |= MCP251XFD_SFR_OSC8_CLKODIV_SET(pConf->ClkoPinConfig); // Configure the CLKO pin (CLKIN+PLL div by 1, 2, 4, 10 or Start Of Frame)
   Config |= MCP251XFD_SFR_OSC8_LPMEN;                                                                    // Set now the Low Power Mode for further check of which module MCP251XFD it is
   Error = MCP251XFD_WriteSFR8(pComp, RegMCP251XFD_OSC_CONFIG, Config);                                   // Write the Oscillator Register configuration
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_WriteSFR8() then return the error
+  //if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_WriteSFR8() then return the error
 
   //--- Check clocks stabilization --------------------------
   uint8_t CheckVal = ((uint8_t)(Config) & MCP251XFD_SFR_OSC8_CHECKFLAGS) | MCP251XFD_SFR_OSC8_OSCRDY;    // Check if PLL Locked (if enabled), OSC clock is running and stable, and SCLKDIV is synchronized (if divided by 2)
@@ -114,36 +114,36 @@ eERRORRESULT Init_MCP251XFD(MCP251XFD *pComp, const MCP251XFD_Config *pConf)
   if ((pComp->DriverConfig & MCP251XFD_DRIVER_SAFE_RESET) > 0)
   {
     Error = pComp->fnSPI_Init(pComp->InterfaceDevice, pComp->SPI_ChipSelect, pComp->SPIClockSpeed);      // Set the SPI speed clock to desired clock speed
-    if (Error != ERR_OK) return Error;                                                                   // If there is an error while changing SPI interface speed then return the error
+    //if (Error != ERR_OK) return Error;                                                                   // If there is an error while changing SPI interface speed then return the error
   }
 
   //--- Configure CRC Interrupts ----------------------------
   if ((pComp->DriverConfig & MCP251XFD_DRIVER_USE_READ_WRITE_CRC) > 0)                                   // If there is a DRIVER_USE_READ_WRITE_CRC flag then
   {
     Error = MCP251XFD_ConfigureCRC(pComp, MCP251XFD_CRC_ALL_EVENTS);                                     // Configure the CRC and all interrupts related to CRC
-    if (Error != ERR_NONE) return Error;                                                                 // If there is an error while calling MCP251XFD_ConfigureCRC() then return the error
+    //if (Error != ERR_NONE) return Error;                                                                 // If there is an error while calling MCP251XFD_ConfigureCRC() then return the error
   }
 
   //--- Check which MCP251XFD it is -------------------------                                            // Since the DEVID register return the same value for MCP2517FD and MCP2518FD, this driver use the OSC.LPMEN to check which one it is
   Error = MCP251XFD_ReadSFR8(pComp, RegMCP251XFD_OSC_CONFIG, &Config);                                   // Read current OSC config mode
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_ReadSFR8() then return the error
+  //if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_ReadSFR8() then return the error
   pComp->InternalConfig |= MCP251XFD_DEV_ID_SET((Config & MCP251XFD_SFR_OSC8_LPMEN) > 0 ? MCP2518FD : MCP2517FD); // Set which one it is to the internal config of the driver
   Config &= ~MCP251XFD_SFR_OSC8_LPMEN;
   Error = MCP251XFD_WriteSFR8(pComp, RegMCP251XFD_OSC_CONFIG, Config);                                   // Write the OSC config mode with the LPM bit cleared
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_WriteSFR8() then return the error
+  //if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_WriteSFR8() then return the error
 
   //--- Test SPI connection and RAM Test --------------------
   if ((pComp->DriverConfig & MCP251XFD_DRIVER_INIT_CHECK_RAM) > 0)                                       // If there is a DRIVER_INIT_CHECK_RAM flag then
   {
     Error = __MCP251XFD_TestRAM(pComp);                                                                  // Check the all the RAM only of the device
-    if (Error != ERR_NONE) return Error;                                                                 // If there is an error while calling __MCP251XFD_TestRAM() then return the error
+    //if (Error != ERR_NONE) return Error;                                                                 // If there is an error while calling __MCP251XFD_TestRAM() then return the error
   }
   else                                                                                                   // Else check only SPI interface
   {
     Error = MCP251XFD_WriteRAM32(pComp, (MCP251XFD_RAM_ADDR + MCP251XFD_RAM_SIZE - 4), 0xAA55AA55);      // Write 0xAA55AA55 at address
-    if (Error != ERR_NONE) return Error;                                                                 // If there is an error while writing the RAM address then return the error
+    //if (Error != ERR_NONE) return Error;                                                                 // If there is an error while writing the RAM address then return the error
     Error = MCP251XFD_ReadRAM32(pComp, (MCP251XFD_RAM_ADDR + MCP251XFD_RAM_SIZE - 4), &Result);          // Read again the data
-    if (Error != ERR_NONE) return Error;                                                                 // If there is an error while reading the RAM address then return the error
+    //if (Error != ERR_NONE) return Error;                                                                 // If there is an error while reading the RAM address then return the error
     if (Result != 0xAA55AA55) return ERR__RAM_TEST_FAIL;                                                 // If data read is not 0xAA55AA55 then return an error
   }
 
@@ -151,35 +151,35 @@ eERRORRESULT Init_MCP251XFD(MCP251XFD *pComp, const MCP251XFD_Config *pConf)
   if ((pComp->DriverConfig & MCP251XFD_DRIVER_ENABLE_ECC) > 0)                                           // If there is a DRIVER_ENABLE_ECC flag then
   {
     Error = MCP251XFD_ConfigureECC(pComp, true, MCP251XFD_ECC_ALL_EVENTS, 0x55);                         // Configure the ECC and enable all interrupts related to ECC
-    if (Error != ERR_NONE) return Error;                                                                 // If there is an error while calling MCP251XFD_ConfigureECC() then return the error
+    //if (Error != ERR_NONE) return Error;                                                                 // If there is an error while calling MCP251XFD_ConfigureECC() then return the error
   }
 
   //--- Initialize RAM if configured ------------------------
   if ((pComp->DriverConfig & MCP251XFD_DRIVER_INIT_SET_RAM_AT_0) > 0)                                    // If there is a DRIVER_INIT_SET_RAM_AT_0 flag then
   {
     Error = MCP251XFD_InitRAM(pComp);                                                                    // Initialize all RAM addresses with 0x00000000
-    if (Error != ERR_NONE) return Error;                                                                 // If there is an error while calling MCP251XFD_InitRAM() then return the error
+    //if (Error != ERR_NONE) return Error;                                                                 // If there is an error while calling MCP251XFD_InitRAM() then return the error
   }
 
   //--- Initialize Int pins or GPIOs ------------------------
   Error = MCP251XFD_SetGPIOPinsOutputLevel(pComp, pComp->GPIOsOutLevel, MCP251XFD_GPIO0_Mask | MCP251XFD_GPIO1_Mask); // Set GPIO pins output level before change to mode GPIO. This is to get directly the good output level when (if) pins will be in output mode
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_ConfigurePins() then return the error
+  //if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_ConfigurePins() then return the error
   Error = MCP251XFD_ConfigurePins(pComp, pConf->GPIO0PinMode, pConf->GPIO1PinMode, pConf->INTsOutMode, pConf->TXCANOutMode, (pConf->ClkoPinConfig == MCP251XFD_CLKO_SOF)); // Configure pins
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_ConfigurePins() then return the error
+  //if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_ConfigurePins() then return the error
 
   //--- Set Nominal and Data bitrate ------------------------
   MCP251XFD_BitTimeConfig ConfBitTime;
   ConfBitTime.Stats = pConf->BitTimeStats;
   Error = MCP251XFD_CalculateBitTimeConfiguration(CompFreq, pConf->NominalBitrate, pConf->DataBitrate, &ConfBitTime); // Calculate Bit Time
-  if (Error != ERR_OK) return Error;                                                                     // If there is an error while calling MCP251XFD_CalculateBitTimeConfiguration() then return the error
+  //if (Error != ERR_OK) return Error;                                                                     // If there is an error while calling MCP251XFD_CalculateBitTimeConfiguration() then return the error
   Error = MCP251XFD_SetBitTimeConfiguration(pComp, &ConfBitTime, pConf->DataBitrate == MCP251XFD_NO_CANFD); // Set Bit Time configuration to registers
-  if (Error != ERR_OK) return Error;                                                                     // If there is an error while calling MCP251XFD_SetBitTimeConfiguration() then return the error
+  //if (Error != ERR_OK) return Error;                                                                     // If there is an error while calling MCP251XFD_SetBitTimeConfiguration() then return the error
 
   //--- CAN configuration -----------------------------------
   Error = MCP251XFD_WriteSFR8(pComp, RegMCP251XFD_CiCON+2, 0x00);                                        // Disable TEF and TXQ configuration in the RegMCP251XFD_CiCON register (Third byte only)
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_WriteSFR8() then return the error
+  //if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_WriteSFR8() then return the error
   Error = MCP251XFD_ConfigureCANController(pComp, pConf->ControlFlags, pConf->Bandwidth);                // Configure the CAN control
-  if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_ConfigureCANControl() then return the error
+  //if (Error != ERR_NONE) return Error;                                                                   // If there is an error while calling MCP251XFD_ConfigureCANControl() then return the error
 
   //--- System interrupt enable -----------------------------
   Error = MCP251XFD_ConfigureInterrupt(pComp, (setMCP251XFD_InterruptEvents)pConf->SysInterruptFlags);   // Configure interrupts to enable
@@ -291,7 +291,7 @@ eERRORRESULT MCP251XFD_ReadData(MCP251XFD *pComp, uint16_t address, uint8_t* dat
     //--- Now send the data through SPI interface ---
     const size_t ByteToReadCount = ByteCount + (UseCRC ? (2 + 1 + 2) : 2);   // In case of use CRC for read, here are 2 bytes for Command + 1 for Length + 2 for CRC, else just 2 for command
     Error = pComp->fnSPI_Transfer(pComp->InterfaceDevice, pComp->SPI_ChipSelect, &Buffer[0], &Buffer[0], ByteToReadCount); // Transfer the data in the buffer
-    if (Error != ERR_NONE) return Error;                                     // If there is an error while transferring data then return the error
+    //if (Error != ERR_NONE) return Error;                                     // If there is an error while transferring data then return the error
 
     //--- Copy buffer to data ---
     BufRemain = ByteCount;                                                   // Set how many data that will fit in the buffer

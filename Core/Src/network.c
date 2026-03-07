@@ -23,28 +23,53 @@ bool CAN_Init() {
     //--- Configure module on Ext1 ---
     eERRORRESULT ErrorExt1 = ERR__NO_DEVICE_DETECTED;
     ErrorExt1 = Init_MCP251XFD(CANEXT1, &MCP2517FD_Ext1_Config);
-    if (ErrorExt1 != ERR_OK)
-        return false;
-
-    ErrorExt1 = MCP251XFD_ConfigureTimeStamp(CANEXT1, true, MCP251XFD_TS_CAN20_SOF_CANFD_SOF,
-                                             TIMESTAMP_TICK(SYSCLK_Ext1), true);
-    if (ErrorExt1 != ERR_OK)
-        return false;
-
+//    if (ErrorExt1 != 0)
+//        return false;
+    if (ErrorExt1 != ERR_OK){
+        DebugPrint("If statement failed");
+    }else{
+        DebugPrint("If statement succeeded");
+    }
+    DebugPrint("ErrorExt1: %d", ErrorExt1);
+    //ErrorExt1 = MCP251XFD_ConfigureTimeStamp(CANEXT1, true, MCP251XFD_TS_CAN20_SOF_CANFD_SOF, TIMESTAMP_TICK(SYSCLK_Ext1), true); TODO: Fix prescaler error (LPSTA, 07/03/2026)
+    ErrorExt1 = MCP251XFD_ConfigureTimeStamp(CANEXT1, true, MCP251XFD_TS_CAN20_SOF_CANFD_SOF, 1, true);
+    //    if (ErrorExt1 != ERR_OK)
+//        return false;
+    if (ErrorExt1 != ERR_OK){
+        DebugPrint("If statement failed");
+    }else{
+        DebugPrint("If statement succeeded");
+    }
+    DebugPrint("ErrorExt1: %d", ErrorExt1);
     ErrorExt1 = MCP251XFD_ConfigureFIFOList(CANEXT1, &MCP2517FD_Ext1_FIFOlist[0], MCP2517FD_EXT1_FIFO_COUNT);
-    if (ErrorExt1 != ERR_OK)
-        return false;
-
+//    if (ErrorExt1 != ERR_OK)
+//        return false;
+    if (ErrorExt1 != ERR_OK){
+        DebugPrint("If statement failed");
+    }else{
+        DebugPrint("If statement succeeded");
+    }
+    DebugPrint("ErrorExt1: %d", ErrorExt1);
     ErrorExt1 = MCP251XFD_ConfigureFilterList(CANEXT1, MCP251XFD_D_NET_FILTER_DISABLE,
                                               &MCP2517FD_Ext1_FilterList[0], MCP2517FD_EXT1_FILTER_COUNT);
-    if (ErrorExt1 != ERR_OK)
-        return false;
-
+//    if (ErrorExt1 != ERR_OK)
+//        return false;
+    if (ErrorExt1 != ERR_OK){
+        DebugPrint("If statement failed");
+    }else{
+        DebugPrint("If statement succeeded");
+    }
+    DebugPrint("ErrorExt1: %d", ErrorExt1);
     // ErrorExt1 = MCP251XFD_StartCAN20(CANEXT1);
     ErrorExt1 = MCP251XFD_StartCANListenOnly(CANEXT1);
-    if (ErrorExt1 != ERR_OK)
-        return false;
-
+//    if (ErrorExt1 != ERR_OK)
+//        return false;
+    if (ErrorExt1 != ERR_OK){
+        DebugPrint("If statement failed");
+    }else{
+        DebugPrint("If statement succeeded");
+    }
+    DebugPrint("ErrorExt1: %d", ErrorExt1);
     return true;
 }
 
@@ -59,7 +84,7 @@ void CAN_Receive() {
         DebugPrint("2 err: %d", ErrorExt1);
         return;
     }
-    DebugPrint("3");
+    //DebugPrint("3");
 
     for (eMCP251XFD_FIFO zFIFO = 1; zFIFO < MCP251XFD_FIFO_MAX; zFIFO++) { // For each receive FIFO but not TEF, TXQ
         if ((InterruptOnFIFO & (1 << zFIFO)) > 0) { // If an Interrupt is flagged

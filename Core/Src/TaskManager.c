@@ -18,9 +18,15 @@ extern SPI_HandleTypeDef hspi1;
 
 _Noreturn void RunTaskManager(void) {
     // Initialize CAN
-    CAN_Init();
+    // MCP251FXD requires 3ms to warm up
+    HAL_Delay(100);
 
-    DebugPrint("%d", hspi1.Instance);
+    printf("Initializing CAN\n");
+
+    int init_status = CAN_Init();
+    DebugPrint("CAN Init status: %d", init_status);
+
+    //DebugPrint("%d", hspi1.Instance);
 
     // Initialize MCP
     // MCP2515_CS_HIGH();

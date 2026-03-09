@@ -23,10 +23,13 @@ eERRORRESULT SPI_Init(void *pIntDev, uint8_t chipSelect, const uint32_t sckFreq)
      return ERR_NONE;
 }
 
-eERRORRESULT SPI_Transfer(void *pIntDev, uint8_t /*chipSelect*/, uint8_t *txData, uint8_t *rxData, size_t size) {
+eERRORRESULT SPI_Transfer(void *pIntDev, uint8_t chipSelect, uint8_t *txData, uint8_t *rxData, size_t size) {
     HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET); // Set chip select low
-    HAL_SPI_Receive(&hspi1, rxData , size, 10); //Read from chip
+    HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(&hspi1, txData, rxData, size, 100); // Full-duplex transfer
+    // HAL_SPI_Receive()
     HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET); // Set chip select high
+
+    return (status == HAL_OK) ? ERR_OK : ERR__SPI_COMM_ERROR;
 }
 
 uint32_t GetCurrentTimeMs(void) {
@@ -63,6 +66,7 @@ MCP251XFD MCP251XFD_Ext1 = {
     //--- Interface driver call functions ---
     .SPI_ChipSelect = 17, // Here the chip select of the EXT1 interface is 1 //Currently unused in UOSM
     .InterfaceDevice = (void*)0x40013000, // Here this point to the address memory of the peripheral SPI1 //TODO: Check that this is the right pointer.
+    // .InterfaceDevice = &hspi1.Instance,
     .fnSPI_Init = &SPI_Init,
     .fnSPI_Transfer = &SPI_Transfer,
     //--- Time call function ---

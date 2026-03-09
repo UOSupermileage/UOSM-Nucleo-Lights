@@ -23,27 +23,50 @@ bool CAN_Init() {
     //--- Configure module on Ext1 ---
     eERRORRESULT ErrorExt1 = ERR__NO_DEVICE_DETECTED;
     ErrorExt1 = Init_MCP251XFD(CANEXT1, &MCP2517FD_Ext1_Config);
-    if (ErrorExt1 != ERR_OK)
+    if (ERR_ERROR_Get(ErrorExt1) != ERR_OK) {
+        DebugPrint("err raw=%lu base=%u (Init_MCP251XFD)",
+                   (unsigned long)ErrorExt1,
+                   (unsigned)ERR_ERROR_Get(ErrorExt1));
         return false;
+    }
 
+    // ErrorExt1 = MCP251XFD_ConfigureTimeStamp(CANEXT1, true, MCP251XFD_TS_CAN20_SOF_CANFD_SOF,
+    //                                          TIMESTAMP_TICK(SYSCLK_Ext1), true);
     ErrorExt1 = MCP251XFD_ConfigureTimeStamp(CANEXT1, true, MCP251XFD_TS_CAN20_SOF_CANFD_SOF,
-                                             TIMESTAMP_TICK(SYSCLK_Ext1), true);
-    if (ErrorExt1 != ERR_OK)
+                                             1, true);
+    if (ERR_ERROR_Get(ErrorExt1) != ERR_OK) {
+        DebugPrint("err raw=%lu base=%u (MCP251XFD_ConfigureTimeStamp)",
+                   (unsigned long)ErrorExt1,
+                   (unsigned)ERR_ERROR_Get(ErrorExt1));
         return false;
+    }
 
     ErrorExt1 = MCP251XFD_ConfigureFIFOList(CANEXT1, &MCP2517FD_Ext1_FIFOlist[0], MCP2517FD_EXT1_FIFO_COUNT);
-    if (ErrorExt1 != ERR_OK)
+    if (ERR_ERROR_Get(ErrorExt1) != ERR_OK) {
+        DebugPrint("err raw=%lu base=%u (MCP251XFD_ConfigureFIFOList)",
+                   (unsigned long)ErrorExt1,
+                   (unsigned)ERR_ERROR_Get(ErrorExt1));
         return false;
+    }
 
     ErrorExt1 = MCP251XFD_ConfigureFilterList(CANEXT1, MCP251XFD_D_NET_FILTER_DISABLE,
                                               &MCP2517FD_Ext1_FilterList[0], MCP2517FD_EXT1_FILTER_COUNT);
-    if (ErrorExt1 != ERR_OK)
+    if (ERR_ERROR_Get(ErrorExt1) != ERR_OK) {
+        DebugPrint("err raw=%lu base=%u (MCP251XFD_ConfigureFilterList)",
+                   (unsigned long)ErrorExt1,
+                   (unsigned)ERR_ERROR_Get(ErrorExt1));
         return false;
+    }
 
     // ErrorExt1 = MCP251XFD_StartCAN20(CANEXT1);
-    ErrorExt1 = MCP251XFD_StartCANListenOnly(CANEXT1);
-    if (ErrorExt1 != ERR_OK)
+    ErrorExt1 = MCP251XFD_StartCAN20(CANEXT1);  // Normal mode - can transmit and receive
+    // Note: Use MCP251XFD_StartCANListenOnly(CANEXT1) if you only want to monitor the bus
+    if (ERR_ERROR_Get(ErrorExt1) != ERR_OK) {
+        DebugPrint("err raw=%lu base=%u (MCP251XFD_StartCAN20)",
+                   (unsigned long)ErrorExt1,
+                   (unsigned)ERR_ERROR_Get(ErrorExt1));
         return false;
+    }
 
     return true;
 }
@@ -55,16 +78,18 @@ void CAN_Receive() {
    // DebugPrint("1");
 
     ErrorExt1 = MCP251XFD_GetReceivePendingInterruptStatusOfAllFIFO(CANEXT1, &InterruptOnFIFO); // Get all FIFO status
-    if (ErrorExt1 == ERR_NONE){
+    // DebugPrint("raw=%u base=%u", ErrorExt1, ERR_ERROR_Get(ErrorExt1));
+    if (ERR_ERROR_Get(ErrorExt1) != ERR_OK){
         DebugPrint("2 err: %d", ErrorExt1);
         return;
     }
-    DebugPrint("3");
+    // DebugPrint("3");
 
     for (eMCP251XFD_FIFO zFIFO = 1; zFIFO < MCP251XFD_FIFO_MAX; zFIFO++) { // For each receive FIFO but not TEF, TXQ
         if ((InterruptOnFIFO & (1 << zFIFO)) > 0) { // If an Interrupt is flagged
             ErrorExt1 = MCP251XFD_GetFIFOStatus(CANEXT1, zFIFO, &FIFOstatus); // Get the status of the flagged FIFO
-            if (ErrorExt1 == ERR_NONE){
+            // DebugPrint("raw=%u base=%u", ErrorExt1, ERR_ERROR_Get(ErrorExt1));
+            if (ERR_ERROR_Get(ErrorExt1) != ERR_OK){
                 DebugPrint("4");
             return;}
 
@@ -100,7 +125,7 @@ void CAN_Send() {
     eERRORRESULT ErrorExt1 = ERR_OK;
     eMCP251XFD_FIFOstatus FIFOstatus = 0;
     ErrorExt1 = MCP251XFD_GetFIFOStatus(CANEXT1, MCP251XFD_TXQ, &FIFOstatus); // First get FIFO2 status
-    if (ErrorExt1 != ERR_OK) {
+    if (ERR_ERROR_Get(ErrorExt1) != ERR_OK) {
         DebugPrint("Error Sending Error: %d\n", ErrorExt1);
         return;
     }
@@ -143,7 +168,7 @@ void CAN_Send() {
         // Send message and flush
         ErrorExt1 = MCP251XFD_TransmitMessageToFIFO(CANEXT1, &TansmitMessage, MCP251XFD_TXQ, true);
 
-        if (ErrorExt1 != ERR_OK)
+        if (ERR_ERROR_Get(ErrorExt1) != ERR_OK)
         {
             DebugPrint("Transmission failed: %d\n", ErrorExt1);
         }
@@ -154,7 +179,7 @@ void CAN_Send() {
 void Flush(){
     eERRORRESULT ErrorExt1 = ERR_OK;
     ErrorExt1 = MCP251XFD_FlushFIFO(CANEXT1, MCP251XFD_TXQ);
-    if (ErrorExt1 != ERR_OK)
+    if (ERR_ERROR_Get(ErrorExt1) != ERR_OK)
         DebugPrint("Flush failed: %d\n", ErrorExt1);
     else{
         DebugPrint("Flush successful\n");
@@ -165,7 +190,7 @@ void CAN_Send_Throttle(const uint16_t* throttle) {
     eERRORRESULT ErrorExt1 = ERR_OK;
     eMCP251XFD_FIFOstatus FIFOstatus = 0;
     ErrorExt1 = MCP251XFD_GetFIFOStatus(CANEXT1, MCP251XFD_FIFO2, &FIFOstatus); // First get FIFO2 status
-    if (ErrorExt1 != ERR_OK)
+    if (ERR_ERROR_Get(ErrorExt1) != ERR_OK)
         return;
 
     //if ((FIFOstatus & MCP251XFD_TX_FIFO_NOT_FULL) > 0) // Second check FIFO not full
@@ -185,7 +210,7 @@ void CAN_Send_Throttle(const uint16_t* throttle) {
         // Send message and flush
         ErrorExt1 = MCP251XFD_TransmitMessageToFIFO(CANEXT1, &TransmitMessage, MCP251XFD_FIFO2, true);
 
-        if (ErrorExt1 != ERR_OK)
+        if (ERR_ERROR_Get(ErrorExt1) != ERR_OK)
         {
             printf("Transmission failed: %d\n", ErrorExt1);
         } else {

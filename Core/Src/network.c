@@ -16,24 +16,38 @@
 //void gpio_callback(uint gpio, uint32_t events) {
 //
 //}
-
 bool CAN_Init() {
 //    gpio_set_irq_enabled_with_callback(MCP_INT_PIN, GPIO_IRQ_EDGE_RISE, true, &gpio_callback);
 
     //--- Configure module on Ext1 ---
-    eERRORRESULT ErrorExt1 = ERR__NO_DEVICE_DETECTED;
+    // eERRORRESULT ErrorExt1 = ERR__NO_DEVICE_DETECTED;
+    // ErrorExt1 = Init_MCP251XFD(CANEXT1, &MCP2517FD_Ext1_Config);
+    // if (ERR_ERROR_Get(ErrorExt1) != ERR_OK) {
+    //     DebugPrint("err raw=%lu base=%u (Init_MCP251XFD)",
+    //                (unsigned long)ErrorExt1,
+    //                (unsigned)ERR_ERROR_Get(ErrorExt1));
+    //     return false;
+    // }
+
+    eERRORRESULT ErrorExt1;
+
+    DebugPrint("CANEXT1=%p", CANEXT1);
+    DebugPrint("conf=%p", &MCP2517FD_Ext1_Config);
+    DebugPrint("SYSCLK=%lu", (unsigned long)SYSCLK_Ext1);
+
     ErrorExt1 = Init_MCP251XFD(CANEXT1, &MCP2517FD_Ext1_Config);
+    DebugPrint("Init raw=%lu base=%u",
+               (unsigned long)ErrorExt1,
+               (unsigned)ERR_ERROR_Get(ErrorExt1));
+
     if (ERR_ERROR_Get(ErrorExt1) != ERR_OK) {
-        DebugPrint("err raw=%lu base=%u (Init_MCP251XFD)",
-                   (unsigned long)ErrorExt1,
-                   (unsigned)ERR_ERROR_Get(ErrorExt1));
         return false;
     }
 
-    // ErrorExt1 = MCP251XFD_ConfigureTimeStamp(CANEXT1, true, MCP251XFD_TS_CAN20_SOF_CANFD_SOF,
-    //                                          TIMESTAMP_TICK(SYSCLK_Ext1), true);
     ErrorExt1 = MCP251XFD_ConfigureTimeStamp(CANEXT1, true, MCP251XFD_TS_CAN20_SOF_CANFD_SOF,
-                                             1, true);
+    TIMESTAMP_TICK(SYSCLK_Ext1), true);
+    // ErrorExt1 = MCP251XFD_ConfigureTimeStamp(CANEXT1, true, MCP251XFD_TS_CAN20_SOF_CANFD_SOF,
+                                             // 1, true);
     if (ERR_ERROR_Get(ErrorExt1) != ERR_OK) {
         DebugPrint("err raw=%lu base=%u (MCP251XFD_ConfigureTimeStamp)",
                    (unsigned long)ErrorExt1,
